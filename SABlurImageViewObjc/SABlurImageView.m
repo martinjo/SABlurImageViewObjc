@@ -22,6 +22,11 @@
 @implementation SABlurImageView
 
 static NSString *const kFadeAnimationKey = @"Fade";
+
+static NSString *const kCountKey = @"count";
+static NSString *const kDurationKey = @"duration";
+static NSString *const kCGImageKey = @"cgImage";
+
 static NSInteger const kMaxImageCount = 10;
 
 #pragma mark - Init Methods
@@ -65,7 +70,8 @@ static NSInteger const kMaxImageCount = 10;
     return self;
 }
 
-- (void)dealloc {
+- (void)dealloc
+{
     self.cgImages = nil;
     if (self.nextBlurLayer) {
         [self.nextBlurLayer removeFromSuperlayer];
@@ -117,7 +123,11 @@ static NSInteger const kMaxImageCount = 10;
     [CATransaction commit];
 }
 
-- (void)blurAnimation:(NSInteger)count dutation:(NSTimeInterval)duration cgImage:(id)cgImage {
+- (void)blurAnimation:(NSDictionary *)dictionary {
+    NSInteger count = ((NSNumber *)dictionary[kCountKey]).integerValue;
+    NSInteger duration = ((NSNumber *)dictionary[kDurationKey]).integerValue;
+    id cgImage = dictionary[kCGImageKey];
+    
     CATransition *transition = [CATransition animation];
     transition.duration = duration / count;
     transition.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
@@ -167,11 +177,12 @@ static NSInteger const kMaxImageCount = 10;
     }
 }
 
-- (void)blur:(CGFloat)percentage {
-    CGFloat newPercentage = percentage;
+-(void)setBlur:(float)blur
+{
+    CGFloat newPercentage = blur;
     if (newPercentage < 0.0f) {
         newPercentage = 0.0f;
-    } else if (newPercentage > 1.0f) {
+    } else if (newPercentage >= 1.0f) {
         newPercentage = 0.99f;
     }
     
@@ -189,16 +200,9 @@ static NSInteger const kMaxImageCount = 10;
     self.previousPercentage = newPercentage;
 }
 
-- (void)startBlurAnimation:(CGFloat)duration {
-    NSInteger count = self.cgImages.count;
-    NSInteger index = 0;
-    for (id cgImage in self.cgImages) {
-        NSTimeInterval delay = (NSTimeInterval)duration / (NSTimeInterval)count * (NSTimeInterval)index++;
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, delay * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            [self blurAnimation:count dutation:duration cgImage:cgImage];
-        });
-    }
-    self.cgImages = [[self.cgImages reverseObjectEnumerator] allObjects].mutableCopy;
+-(float)blur
+{
+    return self.previousPercentage;
 }
 
 #pragma mark - CAAnimationDelegate

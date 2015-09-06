@@ -8,11 +8,14 @@
 
 #import <UIKit/UIKit.h>
 
+
 @interface SABlurImageView : UIImageView
+
+@property (nonatomic, assign) float blur;
 
 - (void)addBlurEffect:(CGFloat)boxSize times:(NSUInteger)times;
 - (void)configrationForBlurAnimation:(CGFloat)boxSize;
-- (void)startBlurAnimation:(CGFloat)duration;
-- (void)blur:(CGFloat)percentage;
+//- (void)startBlurAnimation:(CGFloat)duration;
+//- (void)blur:(CGFloat)percentage;
 
 @end
